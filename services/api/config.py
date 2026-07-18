@@ -1,0 +1,81 @@
+"""
+Configuration management for FastAPI application.
+"""
+
+from functools import lru_cache
+from typing import Optional
+
+from pydantic_settings import BaseSettings
+
+
+class Settings(BaseSettings):
+    """Application settings from environment variables."""
+
+    # Application
+    environment: str = "development"
+    app_name: str = "Intelligent Test Prep Platform API"
+    app_version: str = "0.1.0"
+    api_prefix: str = "/api"
+    debug: bool = True
+
+    # Database
+    database_url: str = "postgresql://testprep:testprep_dev_password@localhost:5432/testprep_db"
+    db_echo: bool = False
+
+    # Redis
+    redis_url: str = "redis://localhost:6379/0"
+
+    # Qdrant
+    qdrant_url: str = "http://localhost:6333"
+    qdrant_api_key: Optional[str] = None
+
+    # JWT
+    jwt_secret_key: str = "your_secret_key_here_change_in_production"
+    jwt_algorithm: str = "HS256"
+    jwt_expiration_hours: int = 24
+    refresh_token_expiration_days: int = 7
+
+    # CORS
+    cors_origins: list[str] = [
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:3000",
+    ]
+
+    # OpenAI
+    openai_api_key: Optional[str] = None
+    openai_model: str = "gpt-4"
+    openai_embedding_model: str = "text-embedding-3-small"
+
+    # Email (Optional)
+    smtp_server: Optional[str] = None
+    smtp_port: int = 587
+    smtp_user: Optional[str] = None
+    smtp_password: Optional[str] = None
+    sender_email: str = "noreply@testprep.local"
+
+    # Storage
+    s3_bucket: str = "testprep-uploads"
+    s3_region: str = "us-east-1"
+    s3_access_key_id: Optional[str] = None
+    s3_secret_access_key: Optional[str] = None
+    s3_endpoint_url: Optional[str] = None
+
+    # Logging
+    log_level: str = "INFO"
+    log_format: str = "json"
+
+    # Feature Flags
+    enable_mock_llm: bool = False
+    enable_analytics: bool = True
+    enable_gamification: bool = True
+
+    class Config:
+        env_file = ".env"
+        case_sensitive = False
+
+
+@lru_cache
+def get_settings() -> Settings:
+    """Get application settings (cached)."""
+    return Settings()
