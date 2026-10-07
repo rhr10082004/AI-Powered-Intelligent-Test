@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
+import Cookies from 'js-cookie';
 import apiClient from '@/lib/api-client';
 
 interface ListeningTrack {
@@ -274,7 +275,7 @@ export default function ListeningPracticePage() {
                       return;
                     }
 
-                    const token = getCookie('access_token');
+                    const token = Cookies.get('access_token');
                     if (!token) {
                       alert('Please login to submit answers');
                       return;
