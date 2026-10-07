@@ -4,7 +4,6 @@ import { useState, useRef } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
 import apiClient from '@/lib/api-client';
-import { getCookie } from 'cookies-next';
 
 interface ListeningTrack {
   id: string;
