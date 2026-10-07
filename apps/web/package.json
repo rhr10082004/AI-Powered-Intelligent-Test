@@ -55,7 +55,8 @@
     "@testing-library/react": "^14.0.0",
     "@testing-library/jest-dom": "^6.1.4",
     "shadcn-ui": "^0.8.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "@typescript-eslint/eslint-plugin": "^6.21.0"
   },
   "engines": {
     "node": ">=18.0.0",
