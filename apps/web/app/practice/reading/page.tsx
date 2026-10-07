@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { getCookie } from 'cookies-next';
+import Cookies from 'js-cookie';
 import apiClient from '@/lib/api-client';
 
 interface Passage {
@@ -59,7 +59,7 @@ export default function ReadingPracticePage() {
         alert('Please select an answer');
         return;
       }
-      const token = getCookie('access_token');
+      const token = Cookies.get('access_token');
       if (!token) {
         alert('Please login to submit answers');
         return;
