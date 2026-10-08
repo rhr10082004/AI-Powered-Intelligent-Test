@@ -24,30 +24,50 @@ interface Question {
   answers: Array<{ id: string; text: string }>;
 }
 
+interface AnswerResult {
+  id: string;
+  question_id: string;
+  is_correct: boolean | null;
+  correct_answer: string | null;
+  explanation: string | null;
+  attempts: number;
+}
+
 export default function ListeningPracticePage() {
   const [selectedTrack, setSelectedTrack] = useState<ListeningTrack | null>(null);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [showTranscript, setShowTranscript] = useState(false);
+  const [submissionMessage, setSubmissionMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [answerResults, setAnswerResults] = useState<Record<string, AnswerResult>>({});
+  const [sessionId, setSessionId] = useState('');
+  const [sessionCompleted, setSessionCompleted] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [examFilter, setExamFilter] = useState('All exams');
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Fetch tracks
   const { data: tracks = [], isLoading: tracksLoading } = useQuery({
     queryKey: ['listening-tracks'],
     queryFn: async () => {
-      const response = await apiClient.get<ListeningTrack[]>('/listening-tracks?limit=20');
+      const response = await apiClient.get<ListeningTrack[]>('/listening-tracks?limit=120');
       return response.data;
     },
   });
+  const visibleTracks = tracks.filter((track) =>
+    (examFilter === 'All exams' || track.exam_type === examFilter) &&
+    `${track.title} ${track.transcript ?? ''}`.toLowerCase().includes(searchTerm.trim().toLowerCase())
+  );
 
   // Fetch questions for selected track
   const { data: trackDetail, isLoading: questionsLoading } = useQuery({
     queryKey: ['listening-track', selectedTrack?.id],
     queryFn: async () => {
       if (!selectedTrack) return null;
-      const response = await apiClient.get<{ questions: Question[] }>(
-        `/listening-tracks/${selectedTrack.id}`
+      const response = await apiClient.get<Question[]>(
+        `/listening-tracks/${selectedTrack.id}/questions`
       );
       return response.data;
     },
@@ -59,6 +79,10 @@ export default function ListeningPracticePage() {
     setSelectedAnswers({});
     setCurrentTime(0);
     setIsPlaying(false);
+    setAnswerResults({});
+    setSubmissionMessage('');
+    setSessionId(crypto.randomUUID());
+    setSessionCompleted(false);
   };
 
   const handleAnswerSelect = (questionId: string, answerId: string) => {
@@ -69,13 +93,35 @@ export default function ListeningPracticePage() {
   };
 
   const togglePlayPause = () => {
-    if (audioRef.current) {
+    if (selectedTrack?.audio_url && audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current.play();
+        void audioRef.current.play().catch(() => setSubmissionMessage('This audio track could not be played.'));
       }
-      setIsPlaying(!isPlaying);
+      return;
+    }
+
+    if (!selectedTrack?.transcript || !('speechSynthesis' in window)) {
+      setSubmissionMessage('Audio playback is not available for this track.');
+      return;
+    }
+
+    if (isPlaying) {
+      window.speechSynthesis.cancel();
+      setIsPlaying(false);
+    } else {
+      const utterance = new SpeechSynthesisUtterance(selectedTrack.transcript);
+      utterance.onstart = () => setIsPlaying(true);
+      utterance.onend = () => {
+        setIsPlaying(false);
+        setCurrentTime(selectedTrack.duration);
+      };
+      utterance.onerror = () => setIsPlaying(false);
+      utterance.onboundary = (event) => {
+        setCurrentTime(Math.floor((event.charIndex / selectedTrack.transcript!.length) * selectedTrack.duration));
+      };
+      window.speechSynthesis.speak(utterance);
     }
   };
 
@@ -111,11 +157,18 @@ export default function ListeningPracticePage() {
       <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
         {!selectedTrack ? (
           // Track List
-          <div className="grid gap-6 md:grid-cols-2">
-            {tracks.map((track) => (
-              <div
+          <>
+          <section className="mb-6 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-[minmax(0,1fr)_180px_auto] sm:items-end" aria-label="Filter listening tracks">
+            <label className="text-xs font-semibold text-slate-600">Find a track or topic<input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Try campus, workshop, research…" className="mt-2 block w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100" /></label>
+            <label className="text-xs font-semibold text-slate-600">Exam<select value={examFilter} onChange={(event) => setExamFilter(event.target.value)} className="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-emerald-600"><option>All exams</option><option>IELTS</option><option>TOEFL</option><option>GRE</option></select></label>
+            <p className="pb-3 text-xs text-slate-500" role="status">{visibleTracks.length} of {tracks.length} tracks</p>
+          </section>
+          {visibleTracks.length === 0 ? <p className="rounded-2xl bg-white p-8 text-center text-sm text-slate-500">No tracks match those filters. Try another exam or search term.</p> : <div className="grid gap-6 md:grid-cols-2">
+            {visibleTracks.map((track) => (
+              <button
+                type="button"
                 key={track.id}
-                className="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition cursor-pointer p-6"
+                className="block w-full rounded-lg bg-white p-6 text-left shadow transition hover:shadow-lg dark:bg-gray-800"
                 onClick={() => handleSelectTrack(track)}
               >
                 <div className="flex items-start justify-between mb-4">
@@ -150,9 +203,10 @@ export default function ListeningPracticePage() {
                     {track.difficulty}
                   </span>
                 </div>
-              </div>
+              </button>
             ))}
-          </div>
+          </div>}
+          </>
         ) : questionsLoading ? (
           <div className="text-center text-gray-600 dark:text-gray-400">
             Loading questions...
@@ -167,12 +221,14 @@ export default function ListeningPracticePage() {
               </h2>
 
               {/* Audio Element (hidden) */}
-              <audio
+              {selectedTrack.audio_url && <audio
                 ref={audioRef}
                 src={selectedTrack.audio_url}
                 onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
                 onEnded={() => setIsPlaying(false)}
-              />
+              />}
 
               {/* Player Controls */}
               <div className="space-y-4">
@@ -223,7 +279,7 @@ export default function ListeningPracticePage() {
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Questions
               </h3>
-              {trackDetail?.questions?.map((question, index) => (
+              {(trackDetail ?? []).map((question, index) => (
                 <div
                   key={question.id}
                   className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"
@@ -254,6 +310,12 @@ export default function ListeningPracticePage() {
                       </label>
                     ))}
                   </div>
+                  {answerResults[question.id] && (
+                    <div className={`mt-4 rounded-md p-3 text-sm ${answerResults[question.id].is_correct ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200' : 'bg-amber-50 text-amber-900 dark:bg-amber-900/30 dark:text-amber-100'}`} role="status">
+                      <p className="font-semibold">{answerResults[question.id].is_correct ? 'Correct' : `Review: ${answerResults[question.id].correct_answer || 'Answer recorded'}`}</p>
+                      {answerResults[question.id].explanation && <p className="mt-1">{answerResults[question.id].explanation}</p>}
+                    </div>
+                  )}
                 </div>
               ))}
 
@@ -266,44 +328,57 @@ export default function ListeningPracticePage() {
                   Back to Tracks
                 </button>
                 <button
+                  disabled={isSubmitting || sessionCompleted}
                   onClick={async () => {
-                    const answeredAll = trackDetail?.questions?.every(
+                    const questions = trackDetail ?? [];
+                    const answeredAll = questions.length > 0 && questions.every(
                       (q) => selectedAnswers[q.id]
                     );
                     if (!answeredAll) {
-                      alert('Please answer all questions before submitting');
+                      setSubmissionMessage('Please answer every question before submitting.');
                       return;
                     }
 
                     const token = Cookies.get('access_token');
                     if (!token) {
-                      alert('Please login to submit answers');
+                      setSubmissionMessage('Sign in before submitting answers.');
                       return;
                     }
 
-                    // Submit each selected answer
-                    for (const q of trackDetail?.questions ?? []) {
-                      const answerId = selectedAnswers[q.id];
-                      if (!answerId) continue;
-
-                      await apiClient.post(
-                        `/questions/answer?token=${encodeURIComponent(token as string)}`,
-                        {
-                          question_id: q.id,
-                          answer_id: answerId,
+                    setIsSubmitting(true);
+                    setSubmissionMessage('');
+                    try {
+                      const results: AnswerResult[] = [];
+                      for (const question of questions) {
+                        const response = await apiClient.post<AnswerResult>('/questions/answer', {
+                          question_id: question.id,
+                          answer_id: selectedAnswers[question.id],
                           time_taken: currentTime ? Math.floor(currentTime) : undefined,
-                        }
-                      );
+                          session_id: sessionId,
+                        });
+                        results.push(response.data);
+                      }
+                      await apiClient.post('/study-sessions/complete', {
+                        session_id: sessionId,
+                        section: 'listening',
+                        duration: Math.floor(currentTime),
+                      });
+                      setSessionCompleted(true);
+                      setAnswerResults(Object.fromEntries(results.map((result) => [result.question_id, result])));
+                      const correct = results.filter((result) => result.is_correct).length;
+                      setSubmissionMessage(`Result: ${correct} of ${results.length} correct (${Math.round((correct / results.length) * 100)}%).`);
+                    } catch {
+                      setSubmissionMessage('Could not submit your answers. Please try again.');
+                    } finally {
+                      setIsSubmitting(false);
                     }
-
-                    alert('Listening practice session submitted!');
-                    setSelectedTrack(null);
                   }}
                   className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition"
                 >
-                  Submit Answers
+                  {isSubmitting ? 'Submitting...' : sessionCompleted ? 'Session complete' : 'Submit Answers'}
                 </button>
               </div>
+              {submissionMessage && <p className="text-sm text-gray-700 dark:text-gray-300" role="status">{submissionMessage}</p>}
             </div>
           </div>
         )}

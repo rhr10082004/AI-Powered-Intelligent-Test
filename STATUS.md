@@ -1,4 +1,6 @@
-# 🚀 Phase 1 Complete - Ready for Phase 2
+# Historical Phase 1 Snapshot (Superseded)
+
+> This document records an earlier project snapshot and is not the current status report. See [progress.md](progress.md) for verified implementation, remaining work, and deployment blockers. The Phase 1 completion claims below should not be treated as proof that every listed production feature or later phase is complete.
 
 ## Executive Summary
 

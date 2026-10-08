@@ -55,6 +55,7 @@ def create_app() -> FastAPI:
     
     # Health check endpoint
     @app.get("/health", response_model=HealthResponse)
+    @app.get("/api/health", response_model=HealthResponse)
     async def health_check() -> HealthResponse:
         """Health check endpoint."""
         return HealthResponse(
@@ -79,12 +80,20 @@ def create_app() -> FastAPI:
     from services.api.routes.exams import router as exams_router
     from services.api.routes.learning import router as learning_router
     from services.api.routes.tutor import router as tutor_router
+    from services.api.routes.writing import router as writing_router
+    from services.api.routes.speaking import router as speaking_router
+    from services.api.routes.mock_tests import router as mock_tests_router
+    from services.api.routes.activity import router as activity_router
 
     app.include_router(auth_router, prefix=settings.api_prefix)
     app.include_router(users_router, prefix=settings.api_prefix)
     app.include_router(exams_router, prefix=settings.api_prefix)
     app.include_router(learning_router, prefix=settings.api_prefix)
     app.include_router(tutor_router, prefix=settings.api_prefix)
+    app.include_router(writing_router, prefix=settings.api_prefix)
+    app.include_router(speaking_router, prefix=settings.api_prefix)
+    app.include_router(mock_tests_router, prefix=settings.api_prefix)
+    app.include_router(activity_router, prefix=settings.api_prefix)
 
     
     # Exception handlers

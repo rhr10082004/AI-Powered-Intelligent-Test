@@ -5,6 +5,7 @@ Configuration management for FastAPI application.
 from functools import lru_cache
 from typing import Optional
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings
 
 
@@ -16,10 +17,11 @@ class Settings(BaseSettings):
     app_name: str = "Intelligent Test Prep Platform API"
     app_version: str = "0.1.0"
     api_prefix: str = "/api"
+    frontend_url: str = "http://localhost:3000"
     debug: bool = True
 
     # Database
-    database_url: str = "postgresql://testprep:testprep_dev_password@localhost:5432/testprep_db"
+    database_url: str = "sqlite+aiosqlite:///./testprep.db"
     db_echo: bool = False
 
     # Redis
@@ -34,6 +36,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expiration_hours: int = 24
     refresh_token_expiration_days: int = 7
+    admin_api_key: Optional[str] = None
 
     # CORS
     cors_origins: list[str] = [
@@ -73,6 +76,15 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = False
+
+    @model_validator(mode="after")
+    def validate_production_settings(self):
+        if self.environment.casefold() == "production":
+            if self.jwt_secret_key == "your_secret_key_here_change_in_production" or len(self.jwt_secret_key) < 32:
+                raise ValueError("JWT_SECRET_KEY must be a unique secret of at least 32 characters in production")
+            if any("localhost" in origin or "127.0.0.1" in origin for origin in self.cors_origins):
+                raise ValueError("CORS_ORIGINS must not contain localhost in production")
+        return self
 
 
 @lru_cache

@@ -1,4 +1,4 @@
-"""Test fixtures and configuration."""
+﻿"""Test fixtures and configuration."""
 
 import pytest
 from httpx import AsyncClient
@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 from services.api.main import create_app
 from services.api.database import Base, get_db_session
+from services.api.models_phase2_isolated import BasePhase2
 from services.api.config import Settings
 
 
@@ -22,18 +23,18 @@ async def test_settings():
 
 @pytest.fixture
 async def test_engine():
-    """Create test database engine."""
+    """Create test database engine with both application metadata sets."""
     engine = create_async_engine(
         "sqlite+aiosqlite:///:memory:",
         echo=False,
         future=True,
     )
-    
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+        await conn.run_sync(BasePhase2.metadata.create_all)
+
     yield engine
-    
     await engine.dispose()
 
 
@@ -59,15 +60,12 @@ async def test_db_session(test_session_factory):
 async def client(test_engine, test_session_factory):
     """Create test client."""
     app = create_app()
-    
-    # Override get_db_session dependency
+
     async def override_get_db():
         async with test_session_factory() as session:
             yield session
-    
+
     app.dependency_overrides[get_db_session] = override_get_db
-    
     async with AsyncClient(app=app, base_url="http://test") as ac:
         yield ac
-    
     app.dependency_overrides.clear()

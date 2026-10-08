@@ -19,6 +19,9 @@
     "clean": "turbo run clean && rm -rf node_modules .turbo"
   },
   "devDependencies": {
+    "@types/js-cookie": "^3.0.6",
+    "@typescript-eslint/eslint-plugin": "^8.71.1",
+    "@typescript-eslint/parser": "^8.71.1",
     "eslint": "^8.50.0",
     "eslint-config-next": "^14.0.0",
     "prettier": "^3.0.0",
@@ -28,5 +31,8 @@
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "tailwindcss-animate": "^1.0.7"
   }
 }

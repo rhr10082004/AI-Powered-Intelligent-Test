@@ -1,4 +1,4 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -69,3 +69,61 @@
 * {
   @apply border-border;
 }
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .motion-enter {
+    animation: rise-in 480ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .motion-stagger > * {
+    animation: rise-in 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--motion-index, 0) * 70ms);
+  }
+
+  .motion-stagger > :nth-child(1) { --motion-index: 0; }
+  .motion-stagger > :nth-child(2) { --motion-index: 1; }
+  .motion-stagger > :nth-child(3) { --motion-index: 2; }
+  .motion-stagger > :nth-child(4) { --motion-index: 3; }
+  .motion-stagger > :nth-child(5) { --motion-index: 4; }
+  .motion-stagger > :nth-child(6) { --motion-index: 5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+/* Landing page art direction and gentle ambient motion */
+.landing-shell { position: relative; isolation: isolate; }
+.landing-orb { position: absolute; z-index: 0; pointer-events: none; border-radius: 9999px; filter: blur(2px); opacity: .55; }
+.landing-orb-one { top: 9rem; right: -10rem; width: 30rem; height: 30rem; background: radial-gradient(circle, rgba(191,225,189,.72), rgba(191,225,189,0) 70%); }
+.landing-orb-two { top: 40rem; left: -13rem; width: 25rem; height: 25rem; background: radial-gradient(circle, rgba(243,216,190,.65), rgba(243,216,190,0) 70%); }
+.study-card { animation: card-arrive 700ms cubic-bezier(.2,.75,.25,1) both; }
+.float-note { animation: float-gently 5s ease-in-out infinite; }
+.float-note-later { animation-delay: -2.5s; }
+.feature-mint { background: linear-gradient(145deg, #e7f1e5 0%, #f3f7ef 100%); }
+.feature-lavender { background: linear-gradient(145deg, #eceaf6 0%, #f6f4fa 100%); }
+.feature-peach { background: linear-gradient(145deg, #f7e9dd 0%, #fbf4ed 100%); }
+@keyframes card-arrive { from { opacity: 0; transform: translateY(18px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes float-gently { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .study-card, .float-note { animation: none; }
+}
+

@@ -64,6 +64,30 @@ class QuestionResponse(QuestionBase):
         from_attributes = True
 
 
+class PublicAnswerResponse(BaseModel):
+    """Answer option without correctness metadata for active practice."""
+    id: UUID
+    text: str
+    order: int
+
+    class Config:
+        from_attributes = True
+
+
+class QuestionPracticeResponse(BaseModel):
+    """Question payload that does not reveal the answer key or explanation."""
+    id: UUID
+    text: str
+    exam_type: str
+    section: str
+    question_type: str
+    difficulty: str
+    answers: List[PublicAnswerResponse]
+
+    class Config:
+        from_attributes = True
+
+
 class QuestionListResponse(BaseModel):
     """Simplified question response for lists."""
     id: UUID
@@ -84,6 +108,7 @@ class UserAnswerCreate(BaseModel):
     answer_id: Optional[UUID] = None  # For MCQ/matching
     user_text_answer: Optional[str] = None  # For essay/short answer
     time_taken: Optional[int] = Field(None, ge=0)
+    session_id: Optional[UUID] = None
 
 
 class UserAnswerResponse(BaseModel):
@@ -100,6 +125,16 @@ class UserAnswerResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+
+class PracticeAnswerResult(BaseModel):
+    """Grading feedback returned only after a learner submits an answer."""
+    id: UUID
+    question_id: UUID
+    is_correct: Optional[bool]
+    correct_answer: Optional[str] = None
+    explanation: Optional[str] = None
+    attempts: int
 
 
 # ============================================================================
@@ -135,7 +170,7 @@ class PassageResponse(PassageBase):
 
 class PassageWithQuestionsResponse(PassageResponse):
     """Passage with related questions."""
-    questions: List[QuestionListResponse] = []
+    questions: List[QuestionPracticeResponse] = []
 
 
 # ============================================================================
@@ -169,6 +204,11 @@ class ListeningTrackResponse(ListeningTrackBase):
     
     class Config:
         from_attributes = True
+
+
+class ListeningTrackWithQuestionsResponse(ListeningTrackResponse):
+    """Listening track with only its linked public practice questions."""
+    questions: List[QuestionPracticeResponse] = []
 
 
 # ============================================================================
@@ -253,6 +293,18 @@ class GrammarExerciseResponse(GrammarExerciseBase):
         from_attributes = True
 
 
+class GrammarExercisePracticeResponse(BaseModel):
+    """Public exercise fields without the solution or explanation."""
+    id: UUID
+    topic_id: UUID
+    sentence: str
+    difficulty: str
+    hint: Optional[str]
+
+    class Config:
+        from_attributes = True
+
+
 class GrammarTopicBase(BaseModel):
     """Base grammar topic schema."""
     topic_name: str = Field(..., min_length=1, max_length=255)
@@ -280,10 +332,41 @@ class GrammarTopicResponse(GrammarTopicBase):
         from_attributes = True
 
 
+class GrammarTopicPracticeResponse(GrammarTopicBase):
+    """Grammar topic with answer-key-safe exercise payloads."""
+    id: UUID
+    exercises: List[GrammarExercisePracticeResponse] = []
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
 class GrammarExerciseAnswerSubmit(BaseModel):
     """Submit grammar exercise answer."""
     exercise_id: UUID
     user_answer: str = Field(..., min_length=1, max_length=500)
+
+
+class GrammarAnswerResult(BaseModel):
+    id: UUID
+    exercise_id: UUID
+    is_correct: bool
+    correct_form: str
+    explanation: Optional[str] = None
+    attempt_number: int
+    created_at: datetime
+
+
+class GrammarAttemptHistoryItem(BaseModel):
+    id: UUID
+    exercise_id: UUID
+    topic_name: str
+    sentence: str
+    user_answer: str
+    is_correct: bool
+    created_at: datetime
 
 
 # ============================================================================
@@ -300,11 +383,18 @@ class StudySessionCreate(BaseModel):
     notes: Optional[str] = None
 
 
+class StudySessionComplete(BaseModel):
+    session_id: UUID
+    section: str
+    duration: int = Field(..., ge=0)
+
+
 class StudySessionResponse(BaseModel):
     """Study session response schema."""
     id: UUID
     user_id: UUID
     exam_id: Optional[UUID]
+    session_id: Optional[UUID] = None
     section: str
     session_date: datetime
     duration: int
@@ -344,6 +434,23 @@ class ProgressSummary(BaseModel):
     total_questions_answered: int
     study_streak: int
     last_practiced: Optional[datetime]
+
+
+class StudyRecommendation(BaseModel):
+    section: str
+    title: str
+    reason: str
+    href: str
+    accuracy_percent: Optional[int] = None
+
+
+class AchievementResponse(BaseModel):
+    id: str
+    title: str
+    description: str
+    current: int
+    target: int
+    unlocked: bool
 
 
 # ============================================================================

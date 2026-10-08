@@ -1,143 +1,43 @@
-'use client';
-
 import Link from 'next/link';
+import PracticeCatalog from './PracticeCatalog';
+
+const modules = [
+  { icon: '◫', title: 'Reading practice', text: 'Build focus and comprehension with exam-style passages.', href: '/practice/reading', color: 'bg-blue-50 text-blue-700', action: 'Explore passages' },
+  { icon: '♫', title: 'Listening practice', text: 'Train your ear with audio clips and thoughtful questions.', href: '/practice/listening', color: 'bg-amber-50 text-amber-700', action: 'Start listening' },
+  { icon: 'Aa', title: 'Vocabulary builder', text: 'Grow your word bank with a review rhythm that sticks.', href: '/practice/vocabulary', color: 'bg-violet-50 text-violet-700', action: 'Study words' },
+  { icon: '✳', title: 'Grammar studio', text: 'Make grammar feel natural with short interactive exercises.', href: '/practice/grammar', color: 'bg-emerald-50 text-emerald-700', action: 'Practice grammar' },
+  { icon: '✎', title: 'Writing coach', text: 'Draft an essay and get a criterion-by-criterion practice review.', href: '/practice/writing', color: 'bg-rose-50 text-rose-700', action: 'Open writing coach' },
+  { icon: 'Mic', title: 'Speaking practice', text: 'Answer a prompt aloud, review your transcript and plan a stronger next attempt.', href: '/practice/speaking', color: 'bg-sky-50 text-sky-700', action: 'Practice speaking' },
+];
 
 export default function PracticePage() {
+  return <PracticeCatalog />;
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Practice Modules
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Select a module to start practicing
-          </p>
+    <main className="min-h-screen overflow-x-hidden bg-[#f8f8f5] px-5 py-10 text-slate-900 sm:px-8 lg:py-14">
+      <div className="mx-auto w-full min-w-0 max-w-6xl">
+        <Link href="/dashboard" className="text-sm font-semibold text-slate-500 transition hover:text-slate-900">← Dashboard</Link>
+        <section className="motion-enter relative mt-7 overflow-hidden rounded-[2rem] bg-[#203d35] px-7 py-9 text-white shadow-xl shadow-emerald-950/10 sm:px-12 sm:py-12">
+          <div className="absolute -right-14 -top-24 h-72 w-72 rounded-full bg-[#a9c9a7]/20 blur-3xl" />
+          <p className="relative text-xs font-bold uppercase tracking-[.2em] text-[#bdd7bb]">Your learning space</p>
+          <h1 className="relative mt-3 max-w-2xl text-3xl font-semibold tracking-tight sm:text-5xl">Small practice. <span className="font-serif italic text-[#c9e0c2]">Real progress.</span></h1>
+          <p className="relative mt-4 max-w-xl text-sm leading-7 text-white/75 sm:text-base">Choose a skill, find your rhythm, and turn a little practice into a lot of confidence.</p>
+          <div className="relative mt-7 flex flex-wrap gap-2 text-xs font-semibold text-white/85"><span className="rounded-full bg-white/10 px-3 py-2">✦ Bite-sized sessions</span><span className="rounded-full bg-white/10 px-3 py-2">↗ Progress you can see</span></div>
+        </section>
+        <div className="motion-enter mt-10 flex items-end justify-between gap-4" style={{ animationDelay: '100ms' }}>
+          <div><p className="text-xs font-bold uppercase tracking-[.18em] text-emerald-800">Explore by skill</p><h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">What would you like to work on?</h2></div>
+          <span className="hidden rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-500 sm:block">5 learning paths</span>
         </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {/* Reading Module */}
-          <Link href="/practice/reading" className="group">
-            <div className="rounded-lg bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition p-8 h-full">
-              <div className="text-4xl mb-4">📖</div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                Reading Practice
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Practice reading comprehension with real exam passages
-              </p>
-              <div className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded text-sm font-semibold">
-                View Passages
-              </div>
-            </div>
-          </Link>
-
-          {/* Listening Module */}
-          <Link href="/practice/listening" className="group">
-            <div className="rounded-lg bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition p-8 h-full">
-              <div className="text-4xl mb-4">🎧</div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                Listening Practice
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Listen to audio clips and answer comprehension questions
-              </p>
-              <div className="inline-block bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded text-sm font-semibold">
-                Listen Now
-              </div>
-            </div>
-          </Link>
-
-          {/* Vocabulary Module */}
-          <Link href="/practice/vocabulary" className="group">
-            <div className="rounded-lg bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition p-8 h-full">
-              <div className="text-4xl mb-4">📚</div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                Vocabulary Builder
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Learn and review vocabulary with spaced repetition
-              </p>
-              <div className="inline-block bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-3 py-1 rounded text-sm font-semibold">
-                Study Words
-              </div>
-            </div>
-          </Link>
-
-          {/* Grammar Module */}
-          <Link href="/practice/grammar" className="group">
-            <div className="rounded-lg bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition p-8 h-full">
-              <div className="text-4xl mb-4">✏️</div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                Grammar Exercises
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Master grammar rules with interactive exercises
-              </p>
-              <div className="inline-block bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-3 py-1 rounded text-sm font-semibold">
-                Practice Grammar
-              </div>
-            </div>
-          </Link>
-
-          {/* Writing Module (Future) */}
-          <div className="opacity-50">
-            <div className="rounded-lg bg-gray-200 dark:bg-gray-700 shadow p-8 h-full">
-              <div className="text-4xl mb-4 opacity-50">✍️</div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                Writing Practice
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Coming Soon
-              </p>
-              <div className="inline-block bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-3 py-1 rounded text-sm font-semibold">
-                Coming Soon
-              </div>
-            </div>
-          </div>
-
-          {/* Speaking Module (Future) */}
-          <div className="opacity-50">
-            <div className="rounded-lg bg-gray-200 dark:bg-gray-700 shadow p-8 h-full">
-              <div className="text-4xl mb-4 opacity-50">🎤</div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                Speaking Practice
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Coming Soon
-              </p>
-              <div className="inline-block bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-3 py-1 rounded text-sm font-semibold">
-                Coming Soon
-              </div>
-            </div>
-          </div>
+        <Link href="/practice/diagnostic" className="mt-5 inline-flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-3 text-sm font-bold text-emerald-900 transition hover:border-emerald-400 hover:bg-emerald-100"><span className="grid h-9 w-9 place-items-center rounded-xl bg-white text-lg" aria-hidden="true">◎</span><span>Take a quick diagnostic <span className="ml-1 text-xs font-medium text-emerald-800/70">5 questions · save your baseline</span></span><span aria-hidden="true">→</span></Link>
+        <div className="motion-stagger mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {modules.map((module) => <Link key={module.title} href={module.href} className="group min-w-0 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700">
+            <span className={`grid h-12 w-12 place-items-center rounded-2xl text-xl font-semibold ${module.color}`}>{module.icon}</span>
+            <h3 className="mt-5 text-lg font-semibold">{module.title}</h3><p className="mt-2 min-h-[3rem] text-sm leading-6 text-slate-500">{module.text}</p>
+            <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-emerald-800">{module.action}<span className="transition group-hover:translate-x-1" aria-hidden="true">→</span></span>
+          </Link>)}
         </div>
-
-        {/* Info Section */}
-        <div className="mt-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-6">
-          <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
-            How to Use Practice Modules
-          </h3>
-          <ul className="text-blue-800 dark:text-blue-200 space-y-2">
-            <li>
-              ✓ <strong>Select a module</strong> to begin practicing
-            </li>
-            <li>
-              ✓ <strong>Complete questions</strong> and get immediate feedback
-            </li>
-            <li>
-              ✓ <strong>View explanations</strong> for all answers
-            </li>
-            <li>
-              ✓ <strong>Track progress</strong> on your dashboard
-            </li>
-          </ul>
-        </div>
-      </main>
-    </div>
+        <p className="mt-8 text-center text-xs leading-5 text-slate-400">Practice feedback is designed to support learning; exam estimates are not official scores.</p>
+      </div>
+    </main>
   );
 }

@@ -36,7 +36,8 @@
     "lucide-react": "^0.292.0",
     "date-fns": "^2.30.0",
     "js-cookie": "^3.0.5",
-    "next-themes": "^0.2.1"
+    "next-themes": "^0.2.1",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "typescript": "^5.2.0",
@@ -55,8 +56,6 @@
     "@testing-library/react": "^14.0.0",
     "@testing-library/jest-dom": "^6.1.4",
     "shadcn-ui": "^0.8.0",
-    "tailwindcss-animate": "^1.0.7",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@types/js-cookie": "^3.0.6"
   },
   "engines": {

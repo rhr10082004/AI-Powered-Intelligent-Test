@@ -1,0 +1,13 @@
+.git
+.github
+.next
+node_modules
+**/node_modules
+**/.next
+testprep.db
+*.db
+.env
+.env.*
+!.env.example
+coverage
+dist

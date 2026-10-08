@@ -1,5 +1,7 @@
 # Tasks - AI-Powered Intelligent Test Preparation Platform
 
+> This is the original planned backlog, not a live completion counter. Implementation has progressed beyond some unchecked items; use `progress.md` for the verified current state and remaining deployment blockers.
+
 ## Phase 1: Foundation
 
 ### Project Setup

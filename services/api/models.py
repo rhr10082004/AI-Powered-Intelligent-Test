@@ -15,12 +15,29 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    TypeDecorator,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from services.api.database import Base
+
+
+class GUID(TypeDecorator):
+    """SQLite/Postgres-compatible UUID column type."""
+
+    impl = String
+    cache_ok = True
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return None
+        return str(value)
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return None
+        return uuid.UUID(value)
 
 
 class ExamType(str, Enum):
@@ -62,7 +79,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(
-        UUID(as_uuid=True),
+        GUID(),
         primary_key=True,
         default=uuid.uuid4,
         nullable=False,
@@ -91,19 +108,33 @@ class User(Base):
         return f"<User(id={self.id}, email={self.email})>"
 
 
+class AuthActionToken(Base):
+    """Hashed, one-use email verification and password reset token."""
+
+    __tablename__ = "auth_action_tokens"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, nullable=False)
+    user_id = Column(GUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    purpose = Column(String(32), nullable=False, index=True)
+    token_hash = Column(String(64), unique=True, nullable=False)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    used_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
+
+
 class UserSettings(Base):
     """User preferences and settings."""
 
     __tablename__ = "user_settings"
 
     id = Column(
-        UUID(as_uuid=True),
+        GUID(),
         primary_key=True,
         default=uuid.uuid4,
         nullable=False,
     )
-    user_id = Column(UUID(as_uuid=True), nullable=False, unique=True, index=True)
-    theme = Column(String(20), default="light", nullable=False)  # light, dark, auto
+    user_id = Column(GUID(), nullable=False, unique=True, index=True)
+    theme = Column(String(20), default="light", nullable=False)
     language = Column(String(10), default="en", nullable=False)
     notifications_email = Column(Boolean, default=True, nullable=False)
     notifications_push = Column(Boolean, default=True, nullable=False)
@@ -126,17 +157,15 @@ class UserExam(Base):
     __tablename__ = "user_exams"
 
     id = Column(
-        UUID(as_uuid=True),
+        GUID(),
         primary_key=True,
         default=uuid.uuid4,
         nullable=False,
     )
-    user_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    user_id = Column(GUID(), nullable=False, index=True)
     exam_type = Column(SQLEnum(ExamType), nullable=False)
-    target_score = Column(String(20), nullable=True)  # e.g., "7.5" for IELTS
-    skill_level = Column(
-        String(20), default="beginner", nullable=False
-    )  # beginner, intermediate, advanced
+    target_score = Column(String(20), nullable=True)
+    skill_level = Column(String(20), default="beginner", nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
     updated_at = Column(
@@ -160,27 +189,18 @@ class AuditLog(Base):
     __tablename__ = "audit_logs"
 
     id = Column(
-        UUID(as_uuid=True),
+        GUID(),
         primary_key=True,
         default=uuid.uuid4,
         nullable=False,
     )
-    user_id = Column(UUID(as_uuid=True), nullable=True, index=True)
+    user_id = Column(GUID(), nullable=True, index=True)
     action = Column(String(100), nullable=False)
     entity_type = Column(String(100), nullable=False)
-    entity_id = Column(UUID(as_uuid=True), nullable=True)
+    entity_id = Column(GUID(), nullable=True)
     description = Column(Text, nullable=True)
-    ip_address = Column(String(45), nullable=True)  # IPv4 or IPv6
+    ip_address = Column(String(45), nullable=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
-
-    __table_args__ = (
-        UniqueConstraint(),
-    )
-
-
-
-
-
 
     def __repr__(self) -> str:
         return f"<AuditLog(action={self.action}, entity_type={self.entity_type})>"
@@ -192,7 +212,7 @@ class Passage(Base):
     __tablename__ = "passages"
 
     id = Column(
-        UUID(as_uuid=True),
+        GUID(),
         primary_key=True,
         default=uuid.uuid4,
         nullable=False,
@@ -216,20 +236,17 @@ class Question(Base):
     __tablename__ = "questions"
 
     id = Column(
-        UUID(as_uuid=True),
+        GUID(),
         primary_key=True,
         default=uuid.uuid4,
         nullable=False,
     )
     text = Column(Text, nullable=False)
-
     exam_type = Column(SQLEnum(ExamType), nullable=False)
     section = Column(SQLEnum(Section), nullable=False)
     difficulty = Column(SQLEnum(Difficulty), nullable=False)
     question_type = Column(SQLEnum(QuestionType), nullable=False)
-
-    # For Week 1, question may optionally belong to a passage (reading section)
-    passage_id = Column(UUID(as_uuid=True), ForeignKey("passages.id"), nullable=True)
+    passage_id = Column(GUID(), ForeignKey("passages.id"), nullable=True)
     explanation = Column(Text, nullable=True)
     audio_url = Column(String(500), nullable=True)
 
@@ -250,17 +267,15 @@ class Answer(Base):
     __tablename__ = "answers"
 
     id = Column(
-        UUID(as_uuid=True),
+        GUID(),
         primary_key=True,
         default=uuid.uuid4,
         nullable=False,
     )
-
-    question_id = Column(UUID(as_uuid=True), ForeignKey("questions.id"), nullable=False, index=True)
+    question_id = Column(GUID(), ForeignKey("questions.id"), nullable=False, index=True)
     text = Column(Text, nullable=False)
     is_correct = Column(Boolean, default=False, nullable=False)
     order = Column(Integer, default=0, nullable=False)
-
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
 
     question = relationship("Question", backref="answers")
@@ -272,23 +287,18 @@ class UserAnswer(Base):
     __tablename__ = "user_answers"
 
     id = Column(
-        UUID(as_uuid=True),
+        GUID(),
         primary_key=True,
         default=uuid.uuid4,
         nullable=False,
     )
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
-    question_id = Column(UUID(as_uuid=True), ForeignKey("questions.id"), nullable=False, index=True)
-    selected_answer_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("answers.id"),
-        nullable=True,
-    )
+    user_id = Column(GUID(), ForeignKey("users.id"), nullable=False, index=True)
+    question_id = Column(GUID(), ForeignKey("questions.id"), nullable=False, index=True)
+    selected_answer_id = Column(GUID(), ForeignKey("answers.id"), nullable=True)
     is_correct = Column(Boolean, default=False, nullable=False)
-    time_taken = Column(Integer, nullable=True)  # seconds
+    time_taken = Column(Integer, nullable=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
 
     user = relationship("User", backref="answers_attempts")
     question = relationship("Question", backref="user_answers")
     selected_answer = relationship("Answer")
-

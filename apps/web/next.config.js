@@ -1,10 +1,17 @@
 /** @type {import('next').NextConfig} */
+const apiUrl = process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:8000/api');
+
+if (process.env.NODE_ENV === 'production' && !apiUrl) {
+  throw new Error('Set NEXT_PUBLIC_API_URL to the deployed API base URL, including /api.');
+}
+
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:8000'),
+    NEXT_PUBLIC_API_URL: apiUrl,
   },
   
   images: {

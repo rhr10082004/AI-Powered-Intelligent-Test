@@ -4,6 +4,9 @@
 .env.*.local
 .env.prod
 .env.prod.local
+.env.*
+!.env.example
+.vercel/
 
 # IDE
 .vscode/
