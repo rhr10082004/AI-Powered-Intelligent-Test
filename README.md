@@ -2,6 +2,9 @@
 
 A comprehensive, modern, AI-assisted platform for preparing students for IELTS, GRE, and TOEFL exams.
 
+**Live app:** [ai-powered-intelligent-test.vercel.app](https://ai-powered-intelligent-test.vercel.app/)  
+**Source:** [GitHub repository](https://github.com/rhr10082004/AI-Powered-Intelligent-Test)
+
 ## 🌟 Features
 
 - **Multi-Exam Support**: IELTS, GRE, TOEFL in one unified platform
