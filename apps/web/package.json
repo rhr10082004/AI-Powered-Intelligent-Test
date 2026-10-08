@@ -40,7 +40,9 @@
     "tailwindcss-animate": "^1.0.7",
     "tailwindcss": "^3.3.5",
     "postcss": "^8.4.31",
-    "autoprefixer": "^10.4.16"
+    "autoprefixer": "^10.4.16",
+    "@alloc/quick-lru": "^5.2.0",
+    "object-hash": "^3.0.0"
   },
   "devDependencies": {
     "typescript": "^5.2.0",
