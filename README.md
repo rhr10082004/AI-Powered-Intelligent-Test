@@ -290,7 +290,7 @@ MIT License - see LICENSE file for details
 
 ## 👥 Team
 
-- **Project Lead**: AI Agent
+- **Project Lead**: Repaka Himanshu Raj,Sita Mahalakshmi
 - **Architecture**: AI Agent
 - **Development**: In Progress
 
